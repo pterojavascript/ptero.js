@@ -1,0 +1,23 @@
+{
+  "name": "ptero.js",
+  "version": "1.0.0",
+  "description": "A Node.JS library wrapper for Pterodactyl API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pterojs/ptero.js.git"
+  },
+  "author": "Antony & Derock",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pterojs/ptero.js/issues"
+  },
+  "homepage": "https://github.com/pterojs/ptero.js#readme",
+  "dependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "node-fetch": "^2.6.1"
+  }
+}
