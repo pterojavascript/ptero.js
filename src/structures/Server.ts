@@ -1,60 +1,36 @@
-export default class Server {
+import { Application, Client } from '..';
+import Base from './Base';
+import { ServerDetails, ServerSFTPDetails, ServerLimits, ServerFeatureLimits, ServerRelationships } from './interfaces/IServer';
 
-    constructor(private serverObject: ServerDetailsV1 | ServerDetailsVp7, private version: "v0.7" | "v1") {
-        // version === "v1" ? this.parseStable(serverObject) : this.parseLegacy(serverObject);
+type Handler = Client | Application;
+
+export default class Server extends Base {
+
+    public identifier: string;
+    public uuid: string;
+    public name: string;
+    public nodeName: string;
+    public sftpDetails: ServerSFTPDetails;
+    public description: string;
+    public limits: ServerLimits;
+    public featureLimits: ServerFeatureLimits;
+    public isSuspended: boolean;
+    public isInstalling: boolean;
+    public relationships: ServerRelationships
+
+    constructor(handler: Handler, serverDetails: ServerDetails, version: "v0.7" | "v1") {
+        super(handler);
+        this.identifier = serverDetails.identifier;
+        this.uuid = serverDetails.uuid;
+        this.name = serverDetails.name;
+        this.nodeName = serverDetails.node;
+        this.sftpDetails = serverDetails.sftp_details;
+        this.description = serverDetails.description;
+        this.limits = serverDetails.limits;
+        this.featureLimits = serverDetails.feature_limits;
+        this.isSuspended = serverDetails.is_suspended;
+        this.isInstalling = serverDetails.is_installing;
+        this.relationships = serverDetails.relationships;
     }
-
-    private parseStable(serverObject: ServerDetailsV1) {
-        
-    }
-
-    private parseLegacy(serverObject: ServerDetailsVp7) {
-
-    }
-
-}
-
-interface ServerAllocations {
-    id: number,
-    ip: string,
-    ip_alias: string | null,
-    port: number,
-    notes: string | null,
-    is_default: boolean
-}
-
-interface ServerDetailsV1 {
-    server_owner: boolean,
-    identifier: string,
-    uuid: string,
-    name: string,
-    node: string,
-    sftp_details: {
-        ip: string,
-        port: number
-    },
-    description: string,
-    limits: {
-        memory: number,
-        swap: number,
-        disk: number,
-        io: number,
-        cpu: number
-    },
-    feature_limits: {
-        databases: number,
-        allocations: number,
-        backups: number
-    },
-    is_suspended: boolean,
-    is_installing: boolean,
-    relationships: {
-        allocations: {
-            data: Array<ServerAllocations>
-        }
-    }
-}
-
-interface ServerDetailsVp7 {
 
 }

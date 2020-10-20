@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/pterojs/ptero.js#readme",
   "dependencies": {
+    "@types/lodash": "^4.14.162",
     "@types/node-fetch": "^2.5.7",
+    "lodash": "^4.17.20",
     "node-fetch": "^2.6.1"
   }
 }

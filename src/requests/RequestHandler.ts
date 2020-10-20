@@ -17,7 +17,7 @@ export default class RequestHandler {
     }
 
     getRequest(endpoint: string) {
-        return fetch(new URL(`${this.baseEndpoint}/${endpoint}`, this.host).href, {
+        return fetch(new URL(`${this.baseEndpoint}${endpoint}`, this.host).href, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${this.apiKey}`,

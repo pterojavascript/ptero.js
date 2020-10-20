@@ -5,7 +5,7 @@ const client = new PteroJS.Client({
 });
 
 (async () => {
-    console.log(await client.getServers())
+    console.log(await client.getUser())
 })()
 
 // dFOGje73F6U1RHV8yv7dEFnGP5V75eKgz13dbXUKdY5w9Psp
