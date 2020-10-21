@@ -7,6 +7,16 @@ export interface ServerAllocations {
     is_default: boolean
 }
 
+export interface ServerVariables {
+    name: string,
+    description: string,
+    env_variable: string,
+    default_value: string,
+    server_value: string,
+    is_editable: string,
+    rules: string,
+}
+
 export interface ServerSFTPDetails {
     ip: string,
     port: number
@@ -27,7 +37,8 @@ export interface ServerFeatureLimits {
 }
 
 export interface ServerRelationships {
-    allocations: Array<ServerAllocations>
+    allocations?: Array<ServerAllocations>,
+    variables?: Array<ServerVariables>
 }
 
 export interface ServerDetails {

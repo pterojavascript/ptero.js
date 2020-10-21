@@ -1,30 +1,71 @@
+import { cloneDeepWith, reject } from "lodash";
 import fetch from "node-fetch";
+import { Response as FetchResponse } from "node-fetch";
+import { Errors } from "..";
+
+type RequestMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+interface RequestResponse {
+    status: number
+}
 
 export default class RequestHandler {
 
-    constructor(private host: string, private apiKey: string, private baseEndpoint: string, private version: "v0.7" | "v1") {}
+    private headers: { 
+        "Authorization": string,
+        "Accept": string,
+        "Content-Type": string
+    };
 
-    postRequest(endpoint: string, body: Object) {
-        return fetch(new URL(`${this.baseEndpoint}/${endpoint}`, this.host).href, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${this.apiKey}`,
-                "Accept": this.version === "v1" ? "application/json" : "application/vnd.pterodactyl.v1+json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        }).then(res => res.json())
+    constructor(private host: string, private apiKey: string, private baseEndpoint: string, private version: "v0.7" | "v1") {
+        this.headers = {
+            "Authorization": `Bearer ${this.apiKey}`,
+            "Accept": this.version === "v1" ? "application/json" : "application/vnd.pterodactyl.v1+json",
+            "Content-Type": "application/json"
+        };
     }
 
-    getRequest(endpoint: string) {
-        return fetch(new URL(`${this.baseEndpoint}${endpoint}`, this.host).href, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${this.apiKey}`,
-                "Accept": this.version === "v1" ? "application/json" : "application/vnd.pterodactyl.v1+json",
-                "Content-Type": "application/json"
-            }
-        }).then(res => res.json())
+    post(endpoint: string, body: Object) {
+        return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("POST", body)));
+    }
+
+    get(endpoint: string) {
+        return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("GET")));
+    }
+
+    private _parseRequest(res: Promise<FetchResponse>): Promise<RequestResponse> {
+        return new Promise(resolve => {
+            let status: number;
+            res.then(async res => {
+                status = res.status;
+                if(status < 200 || status >= 300) {
+                    throw new Errors.GenericError(`Request failed: ${res.statusText}`);
+                }
+                
+                return res.clone().json().then(json => {
+                    json["status"] = status
+                    return json;
+                }).catch(() => {
+                    return { status }
+                })
+            }).then(res => {
+                resolve(res);
+            }).catch(err => {
+                throw new Errors.GenericError(`Request failed: ${err}`);
+            })
+        })
+    }
+
+    private _buildUrl(endpoint: string) {
+        return new URL(`${this.baseEndpoint}${endpoint}`, this.host).href;
+    }
+
+    private _buildData(method: RequestMethods, body?: Object | JSON) {
+        return {
+            method,
+            headers: this.headers,
+            body: JSON.stringify(body)
+        }
     }
 
 }

@@ -1,10 +1,11 @@
 import { Client } from '..';
 import { Application } from '..';
+import RequestHandler from '../requests/RequestHandler';
 
 export default class Base {
 
-    public client?: Client = undefined;
-    public application?: Application = undefined;
+    public client?: Client;
+    public application?: Application;
 
     constructor(handler: Client | Application) {
         if(handler instanceof Client) this.client = handler;
@@ -12,3 +13,5 @@ export default class Base {
     }
 
 }
+
+export type Handler = Client | Application;

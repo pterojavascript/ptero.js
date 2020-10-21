@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import RequestHandler from '../requests/RequestHandler';
 import Error from '../error/Error';
 import Util from '../util/Util';
@@ -8,29 +9,48 @@ interface ClientOptions {
     host: string,
     apiKey: string,
     version?: "v0.7" | "v1"
+    autoLogin: boolean;
 }
 
-export default class Client {
+export default class Client extends EventEmitter {
 
-    private requestHandler: RequestHandler;
+    public requests: RequestHandler;
+    public host: string;
+    public apiKey: string;
+    public version: "v0.7" | "v1";
+    public autoLogin: boolean;
+    public user?: User;
+
     private baseEndpoint: string = "/api/client";
-    private host: string;
-    private apiKey: string;
-    private version: "v0.7" | "v1";
 
     constructor(options: ClientOptions) {
+        super();
         if(!Util.objectHasAll(options, "host", "apiKey")) throw new Error.GenericError("'host' and 'apiKey' fields are required");
         
         this.host = options.host;
         this.apiKey = options.apiKey;
         this.version = options.version || "v1";
+        this.autoLogin = options.autoLogin !== undefined && typeof options.autoLogin === "boolean" ? options.autoLogin : true;
+        
 
-        this.requestHandler = new RequestHandler(this.host, this.apiKey, this.baseEndpoint, this.version)
+        this.requests = new RequestHandler(this.host, this.apiKey, this.baseEndpoint, this.version)
+
+        if(this.autoLogin) {
+            this.login().then(() => {
+                this.emit("ready");
+            }).catch(err => {
+                throw err
+            })
+        }
     }
 
-    getUser(): Promise<User> {
+    on(event: "ready" | "login" | "rateLimit", listener: (...args: any[]) => void): this {
+        return super.on(event, listener);
+    };
+
+    private getUser(): Promise<User> {
         return new Promise((resolve, reject) => {
-            this.requestHandler.getRequest("/account").then(json => {
+            this.requests.get("/account").then(json => {
                 const parsed = Util.genericResponseParse(json);
                 if(!parsed.id) reject(new Error.GenericError("API Error"))
 
@@ -39,9 +59,17 @@ export default class Client {
         })
     }
 
+    login(): Promise<Client> {
+        return this.getUser().then(user => {
+            this.user = user;
+            this.emit("login");
+            return this;
+        })
+    }
+
     getServers(): Promise<Array<Server>> {
         return new Promise((resolve, reject) => {
-            this.requestHandler.getRequest("/").then(json => {
+            this.requests.get("/").then(json => {
                 const servers: Array<Server> = [];
 
                 const parsed = Util.genericResponseParse(json);

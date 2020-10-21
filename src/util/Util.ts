@@ -1,4 +1,4 @@
-import _, { StringIterator } from 'lodash';
+import _, { last, StringIterator } from 'lodash';
 
 export default class Util {
 
@@ -10,9 +10,7 @@ export default class Util {
         let cloned: any = _.clone(obj);
         let lastParent: any = cloned;
         for(const [key, value] of Object.entries(obj)) {
-            if(keys.includes(key)) {
-                Object.assign(lastParent, value)
-            }
+            if(keys.includes(key)) Object.assign(lastParent, value)
 
             if(value && typeof value === "object") cloned[key] = this.cloneIntoRoot(value, keys);
             if(value && typeof Array.isArray(value)) {
@@ -20,10 +18,26 @@ export default class Util {
                     const arrValue = value[i];
                     if(arrValue && typeof arrValue === "object") value[i] = this.cloneIntoRoot(arrValue, keys) 
                 }
+
+                if(Object.keys(lastParent).length <= 1) lastParent = value;
             }
         }
 
-        return this.omitDeep(cloned, ["attributes"]);
+        return this.cloneArrayIntoRoot(this.omitDeep(cloned, ["attributes"]), ["data"]);
+    }
+
+    static cloneArrayIntoRoot<T>(obj: T, keys: Array<string>, root: any = true) {
+        const cloned: any = _.clone(obj);
+        const lastParent: any = cloned;
+        for(const [key, value] of Object.entries(obj)) {
+            if(value && !root && Array.isArray(value) && keys.includes(key) && Object.keys(lastParent).length <= 1) {
+                return value;
+            }
+
+            if(value && typeof value === "object") cloned[key] = this.cloneArrayIntoRoot(value, keys, false)
+        }
+
+        return cloned;
     }
 
     static genericResponseParse<T>(requestResponse: T) {
