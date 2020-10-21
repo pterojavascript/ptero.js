@@ -4,6 +4,7 @@ import Error from '../error/Error';
 import Util from '../util/Util';
 import Server from '../structures/Server';
 import User from '../structures/User';
+import Permission from '../structures/interfaces/Permission';
 
 interface ClientOptions {
     host: string,
@@ -81,6 +82,23 @@ export default class Client extends EventEmitter {
 
                 resolve(servers);
             });
+        })
+    }
+
+    getPermissions(): Promise<Map<String, Permission>> {
+        return new Promise((resolve, reject) => {
+            this.requests.get("/permissions").then(json => {
+                const permissions: Map<string, Permission> = new Map();
+
+                const parsed = Util.genericResponseParse(json);
+                if(!parsed.permissions) reject(new Error.GenericError("API Error"));
+                
+                for(const [key, value] of Object.entries(parsed.permissions)) {
+                    permissions.set(key, value as Permission);
+                }
+
+                resolve(permissions);
+            })
         })
     }
 

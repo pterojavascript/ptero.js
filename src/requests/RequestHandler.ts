@@ -33,6 +33,18 @@ export default class RequestHandler {
         return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("GET")));
     }
 
+    put(endpoint: string, body: Object) {
+        return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("PUT", body)));
+    }
+    
+    patch(endpoint: string, body: Object) {
+        return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("PATCH", body)));
+    }
+
+    delete(endpoint: string, body: Object) {
+        return this._parseRequest(fetch(this._buildUrl(endpoint), this._buildData("DELETE", body)));
+    }
+
     private _parseRequest(res: Promise<FetchResponse>): Promise<RequestResponse> {
         return new Promise(resolve => {
             let status: number;

@@ -1,12 +1,12 @@
 const PteroJS = require("./dist");
 const client = new PteroJS.Client({
     host: "https://ptero.derock.dev",
-    apiKey: "dFOGje73F6U1RHV8yv7dEFnGP5V75eKgz13dbXUKdY5w9Psp"
+    apiKey: "nH36FWe4mIB8VFjscryy6CZYyNHhrMxV7GlpxsZ65AAjvgTb"
 });
 
 client.on("ready", async () => {
     console.log("Ready");
-    console.log((await client.getServers())[0].relationships.variables);
+    await client.user.updatePassword("123456", "1234").then(console.log).catch(console.log)
 })
 
 // dFOGje73F6U1RHV8yv7dEFnGP5V75eKgz13dbXUKdY5w9Psp
